@@ -32,7 +32,7 @@ namespace SimpleSolution.Test
         {
             HttpResponseMessage response = await Client.SendAsync(
                 new HttpRequestMessage(new HttpMethod(method), "users/2?name=superman"));
-            
+
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
