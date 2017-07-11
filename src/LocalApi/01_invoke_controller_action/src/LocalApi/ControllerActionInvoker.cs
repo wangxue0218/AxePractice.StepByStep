@@ -28,21 +28,20 @@ namespace LocalApi
         {
             Type type = actionDescriptor.Controller.GetType();
             var instance = Activator.CreateInstance(type);
-            var methodInfo = type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .SingleOrDefault(m => m.Name.ToLower().Equals(actionDescriptor.ActionName.ToLower()));
 
-            if (methodInfo == null) return new HttpResponseMessage(HttpStatusCode.NotFound);
-            object resultValue;
+            var methodInfo = type.GetMethod(
+                actionDescriptor.ActionName,
+                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if(methodInfo == null) return new HttpResponseMessage(HttpStatusCode.NotFound);
+
             try
             {
-                resultValue = methodInfo.Invoke(instance, null);
-
+                return (HttpResponseMessage)methodInfo.Invoke(instance, null);
             }
-            catch (TargetInvocationException ex)
+            catch
             {
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }
-            return (HttpResponseMessage)resultValue;
         }
 
         #endregion
