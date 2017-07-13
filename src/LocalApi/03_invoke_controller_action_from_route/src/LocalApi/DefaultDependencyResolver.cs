@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LocalApi
 {
@@ -21,20 +22,19 @@ namespace LocalApi
          * directly calling its default constructor. So any controller without a 
          * default constructor will not be supported.
          */
-
+        IEnumerable<Type> controllerTypes;
         internal DefaultDependencyResolver(IEnumerable<Type> controllerTypes)
         {
-            throw new NotImplementedException();
+            this.controllerTypes = controllerTypes;
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public object GetService(Type type)
         {
-            throw new NotImplementedException();
+            return controllerTypes.Contains(type) ? Activator.CreateInstance(type) : null;
         }
 
         #endregion
