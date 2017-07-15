@@ -20,10 +20,11 @@ namespace LocalApi.Routing
         {
             ValidateIdentifier(controllerName, nameof(controllerName));
             ValidateIdentifier(actionName, nameof(actionName));
+            if(methodConstraint == null) throw new ArgumentNullException(nameof(methodConstraint));
 
             ControllerName = controllerName;
             ActionName = actionName;
-            MethodConstraint = methodConstraint ?? throw new ArgumentNullException(nameof(methodConstraint));
+            MethodConstraint = methodConstraint;
             UriTemplate = uriTemplate;
         }
 

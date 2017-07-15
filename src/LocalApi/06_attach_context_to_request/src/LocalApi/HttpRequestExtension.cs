@@ -22,12 +22,13 @@ namespace LocalApi
             HttpConfiguration configuration,
             HttpRoute matchedRoute)
         {
-            throw new NotImplementedException();
+            request.Properties.Add("Configuration", configuration);
+            request.Properties.Add("MatchedRoute", matchedRoute);
         }
 
         public static HttpRequestContext GetRequestContext(this HttpRequestMessage request)
         {
-            throw new NotImplementedException();
+            return new HttpRequestContext((HttpConfiguration) request.Properties["Configuration"], (HttpRoute)request.Properties["MatchedRoute"]);
         }
 
         #endregion
