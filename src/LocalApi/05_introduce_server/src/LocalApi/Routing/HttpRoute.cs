@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 
 namespace LocalApi.Routing
 {
     public class HttpRoute
     {
+        static readonly Regex regex = new Regex("^[a-zA-Z][a-zA-Z0-9]*$");
+
         public HttpRoute(string controllerName, string actionName, HttpMethod methodConstraint) : 
             this(controllerName, actionName, methodConstraint, null)
         {
@@ -16,9 +19,13 @@ namespace LocalApi.Routing
          * You can add non-public helper method for help, but you cannot change public
          * interfaces.
          */
-
         public HttpRoute(string controllerName, string actionName, HttpMethod methodConstraint, string uriTemplate)
         {
+            if(controllerName == null) throw new ArgumentNullException(nameof(controllerName));
+            if(actionName == null) throw new ArgumentNullException(nameof(actionName));
+            if(methodConstraint == null) throw new ArgumentNullException(nameof(methodConstraint));
+
+            if (!regex.IsMatch(controllerName) || !regex.IsMatch(actionName)) throw new ArgumentException();
             ControllerName = controllerName;
             ActionName = actionName;
             MethodConstraint = methodConstraint;

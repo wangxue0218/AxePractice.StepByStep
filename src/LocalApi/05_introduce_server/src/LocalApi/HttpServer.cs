@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -17,15 +18,23 @@ namespace LocalApi
          * the public interfaces.
          */
 
+        readonly HttpConfiguration configuration;
         public HttpServer(HttpConfiguration configuration)
         {
-            throw new NotImplementedException();
+            this.configuration = configuration;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            HttpRoute route = configuration.Routes.GetRouteData(request);
+            if(route == null) return new HttpResponseMessage(HttpStatusCode.NotFound);
+//            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+            return ControllerActionInvoker.InvokeAction(
+                route,
+                configuration.CachedControllerTypes,
+                configuration.DependencyResolver,
+                configuration.ControllerFactory);
         }
 
         #endregion
