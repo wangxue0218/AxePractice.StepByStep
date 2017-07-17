@@ -82,19 +82,22 @@ namespace LocalApi
         {
             try
             {
-                object response = method.Invoke(actionDescriptor.Controller, null);
-                if (response.GetType().Name.Equals("HttpResponseMessage"))
+                object resultValue = method.Invoke(actionDescriptor.Controller, null);
+                var response = resultValue as HttpResponseMessage;
+                if (response != null)
                 {
-                    return Task.FromResult((HttpResponseMessage) response);
+                    return Task.FromResult(response);
                 }
-                else
+                var taskResponse = resultValue as Task<HttpResponseMessage>;
+                if (taskResponse != null)
                 {
-                    return (Task<HttpResponseMessage>)response;
+                    return taskResponse;
                 }
+                return Task.FromException<HttpResponseMessage>(new InvalidOperationException());
             }
-            catch
+            catch(Exception error)
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+                return Task.FromException<HttpResponseMessage>(error);
             }
         }
 
