@@ -13,14 +13,15 @@ namespace Manualfac.Activators
          * No public members are allowed to create.
          */
 
+        readonly Func<IComponentContext, object> func;
         public DelegatedInstanceActivator(Func<IComponentContext, object> func)
         {
-            throw new NotImplementedException();
+            this.func = func;
         }
 
         public object Activate(IComponentContext componentContext)
         {
-            throw new NotImplementedException();
+            return func(componentContext);
         }
 
         #endregion
