@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Manualfac.Services;
+using Manualfac.Sources;
 
 namespace Manualfac
 {
@@ -15,12 +17,6 @@ namespace Manualfac
         {
             if (registration == null) { throw new ArgumentNullException(nameof(registration)); }
             serviceInfos[registration.Service] = registration;
-        }
-
-        public void RegisterSource(IRegistrationSource source)
-        {
-            if (source == null) { throw new ArgumentNullException(nameof(source)); }
-            sources.Add(source);
         }
 
         public bool TryGetRegistration(Service service, out ComponentRegistration registration)
@@ -39,9 +35,23 @@ namespace Manualfac
              * return fasle. If we have found one. Then create a concrete component registration
              * and add it to serviceInfos for speed acceleration.
              */
-            throw new NotImplementedException();
+            var componentRegisteration = sources.Select(s => s.RegistrationFor(service)).FirstOrDefault(e => e != null);
+            if (componentRegisteration != null)
+            {
+                registration = componentRegisteration;
+                Register(registration);
+                return true;
+            }
 
+            registration = null;
+            return false;
             #endregion
+        }
+
+        public void RegisterSource(IRegistrationSource source)
+        {
+            if (source == null) { throw new ArgumentNullException(nameof(source)); }
+            sources.Add(source);
         }
     }
 }
