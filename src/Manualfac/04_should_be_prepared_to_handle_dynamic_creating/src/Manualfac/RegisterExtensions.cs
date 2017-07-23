@@ -45,7 +45,15 @@ namespace Manualfac
              * instance member function.
              */
 
-            throw new NotImplementedException();
+            if(cb == null) throw new ArgumentNullException(nameof(cb));
+            if(registration == null) throw new ArgumentNullException(nameof(registration));
+            var builder = new RegistrationBuilder
+            {
+                Service = registration.Service,
+                Activator = registration.Activator
+            };
+            cb.RegisterCallback(c => c.Register(builder.Build()));
+            return builder;
 
             #endregion
         }

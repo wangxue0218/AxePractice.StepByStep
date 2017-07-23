@@ -8,7 +8,7 @@ namespace Manualfac
         readonly Dictionary<Service, ComponentRegistration> serviceInfos =
             new Dictionary<Service, ComponentRegistration>();
 
-        public void Register(ComponentRegistration registration)
+        public ComponentRegistration Register(ComponentRegistration registration)
         {
             #region Please implement the code to pass the test
 
@@ -17,7 +17,9 @@ namespace Manualfac
              * implement the method.
              */
 
-            throw new NotImplementedException();
+            if(registration == null) throw new ArgumentNullException(nameof(registration));
+            serviceInfos[registration.Service] = registration;
+            return registration;
 
             #endregion
         }
@@ -30,8 +32,13 @@ namespace Manualfac
              * Please implement the method to get registration from the registered services.
              */
 
+            if (serviceInfos.ContainsKey(service))
+            {
+                registration = serviceInfos[service];
+                return true;
+            }
             registration = null;
-            throw new NotImplementedException();
+            return false;
 
             #endregion
         }
