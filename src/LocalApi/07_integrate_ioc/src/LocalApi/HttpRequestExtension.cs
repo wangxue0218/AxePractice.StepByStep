@@ -33,7 +33,11 @@ namespace LocalApi
              * Please implement the method to dispose request context if there is any.
              */
 
-            throw new NotImplementedException();
+            if (request.Properties.ContainsKey(requestContextKey))
+            {
+                request.Properties[requestContextKey] = null;
+                request.Properties.Remove(requestContextKey);
+            }
 
             #endregion
         }
