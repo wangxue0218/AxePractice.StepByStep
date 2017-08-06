@@ -28,7 +28,9 @@ namespace Manualfac.LocalApiIntegration
 
         public object GetService(Type type)
         {
-            return lifetimeScope.Resolve(type);
+            object resolved;
+            lifetimeScope.TryResolve(type, out resolved);
+            return resolved;
         }
 
         #endregion

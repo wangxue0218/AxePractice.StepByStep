@@ -13,27 +13,27 @@ namespace Manualfac.LocalApiIntegration
          * 
          * You can add a public/internal constructor and non-public fields if needed.
          */
-        readonly ILifetimeScope container;
-        readonly IDependencyScope dependencyScope;
+        readonly ILifetimeScope rootScope;
         public ManualfacDependencyResolver(Container rootScope)
         {
-            container = rootScope;
-            dependencyScope = new ManualfacDependencyScope(rootScope);
+            this.rootScope = rootScope;
         }
 
         public void Dispose()
         {
-            container.Dispose();
+            rootScope.Dispose();
         }
 
         public object GetService(Type type)
         {
-            return dependencyScope.GetService(type);
+            object resolved;
+            rootScope.TryResolve(type, out resolved);
+            return resolved;
         }
 
         public IDependencyScope BeginScope()
         {
-            return new ManualfacDependencyScope(container);
+            return new ManualfacDependencyScope(rootScope.BeginLifetimeScope());
         }
 
         #endregion
