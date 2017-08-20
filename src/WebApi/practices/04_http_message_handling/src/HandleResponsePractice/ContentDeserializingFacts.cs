@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace HandleResponsePractice
@@ -50,12 +51,11 @@ namespace HandleResponsePractice
             // I want { id, name, sizes } here. Please get properties from the content. 
             // You cannot change any code beyond the region.
 
-            var result = JsonConvert.DeserializeAnonymousType(
-                content.ToString(),
-                new {id = default(int), name = default(string), sizes = default(string[])});
-            id = result.id;
-            name = result.name;
-            sizes = result.sizes;
+            var result = content as JObject;
+
+            id = result["id"].Value<int>();
+            name = result["name"].Value<string>();
+            sizes = result["sizes"].Values<string>();
 
             #endregion
             
