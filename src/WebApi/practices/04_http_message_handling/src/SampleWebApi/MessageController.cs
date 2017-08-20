@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
@@ -14,9 +15,16 @@ namespace SampleWebApi
             // order to pass the test.
             // You can add new files if you want. But you cannot change any existed code.
 
-            throw new NotImplementedException();
+            return Request.CreateResponse(HttpStatusCode.OK, new ResultMessage {Message = "Hello"});
 
             #endregion
         }
+
+    }
+
+    [Serializable]
+    public class ResultMessage
+    {
+        public string Message { get; set; }
     }
 }
