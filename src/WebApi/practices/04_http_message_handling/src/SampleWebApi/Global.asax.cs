@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http.Formatting;
 using System.Web;
 using System.Web.Http;
 using Autofac;
@@ -22,6 +23,7 @@ namespace SampleWebApi
         {
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = 
                 new CamelCasePropertyNamesContractResolver();
+            config.Formatters.XmlFormatter.UseXmlSerializer = true;
         }
 
         void InitRoute(HttpConfiguration config)
