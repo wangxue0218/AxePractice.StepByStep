@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Filters;
+using Newtonsoft.Json.Linq;
+using SampleWebApi.Services;
 
 namespace SampleWebApi
 {
@@ -35,7 +41,8 @@ namespace SampleWebApi
          */
         public RestrictedUacAttribute(string userIdArgumentName)
         {
-            throw new NotImplementedException();
+            if(userIdArgumentName == null) throw new ArgumentNullException(nameof(userIdArgumentName));
+            this.userIdArgumentName = userIdArgumentName;
         }
 
         /*
@@ -49,7 +56,34 @@ namespace SampleWebApi
             HttpActionExecutedContext context,
             CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context.Exception != null || context.Response == null || !context.Response.IsSuccessStatusCode)
+                return;
+            if (context.Request.Content == null) return;
+            if (context.ActionContext?.ActionArguments == null || !context.ActionContext.ActionArguments.ContainsKey(userIdArgumentName))
+            {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+
+            long userId;
+            try
+            {
+                userId = (long) context.ActionContext.ActionArguments[userIdArgumentName];
+            }
+            catch (InvalidCastException)
+            {
+                throw new ArgumentNullException();
+            }
+
+            JsonMediaTypeFormatter jsonFormatter = context.ActionContext.ControllerContext.Configuration.Formatters.JsonFormatter;
+            var responseContent = context.Response.Content as ObjectContent;
+            if (responseContent == null) return;
+
+            var service = context.Request.GetDependencyScope().GetService(typeof(RestrictedUacContractService)) as RestrictedUacContractService;
+            if (service == null) return;
+            JObject result = await responseContent.ReadAsAsync<JObject>(token);
+            service.RemoveRestrictedInfo(userId, result);
+            context.Response.Content = new ObjectContent<JObject>(result, jsonFormatter);
         }
 
         #endregion
