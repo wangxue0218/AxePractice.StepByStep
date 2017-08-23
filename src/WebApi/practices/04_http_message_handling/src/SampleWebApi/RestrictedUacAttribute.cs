@@ -1,11 +1,14 @@
 ﻿using System;
+using System.CodeDom;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SampleWebApi.Services;
 
@@ -59,7 +62,8 @@ namespace SampleWebApi
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (context.Exception != null || context.Response == null || !context.Response.IsSuccessStatusCode)
                 return;
-            if (context.Request.Content == null) return;
+            if (context.Response.Content == null) return;
+
             if (context.ActionContext?.ActionArguments == null || !context.ActionContext.ActionArguments.ContainsKey(userIdArgumentName))
             {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
@@ -72,18 +76,35 @@ namespace SampleWebApi
             }
             catch (InvalidCastException)
             {
-                throw new ArgumentNullException();
+                throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 
             JsonMediaTypeFormatter jsonFormatter = context.ActionContext.ControllerContext.Configuration.Formatters.JsonFormatter;
-            var responseContent = context.Response.Content as ObjectContent;
-            if (responseContent == null) return;
 
-            var service = context.Request.GetDependencyScope().GetService(typeof(RestrictedUacContractService)) as RestrictedUacContractService;
-            if (service == null) return;
-            JObject result = await responseContent.ReadAsAsync<JObject>(token);
-            service.RemoveRestrictedInfo(userId, result);
-            context.Response.Content = new ObjectContent<JObject>(result, jsonFormatter);
+            var service = Resolve<RestrictedUacContractService>(context.Request);
+            string content = await context.Response.Content.ReadAsStringAsync();
+            var jObject = JsonConvert.DeserializeObject<object>(content) as JObject;
+            if(jObject == null) { return; }
+            bool removeRestrictedInfo = service.RemoveRestrictedInfo(userId, jObject);
+            if (!removeRestrictedInfo){ return; }
+
+            context.Response.Content = new ObjectContent<JObject>(jObject, jsonFormatter);
+        }
+
+        static T Resolve<T>(HttpRequestMessage request)
+        {
+            IDependencyScope scope = request?.GetDependencyScope();
+            if (scope == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.InternalServerError);
+            }
+            var service = (T) scope.GetService(typeof(T));
+            if (service == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.InternalServerError);
+            }
+
+            return service;
         }
 
         #endregion
