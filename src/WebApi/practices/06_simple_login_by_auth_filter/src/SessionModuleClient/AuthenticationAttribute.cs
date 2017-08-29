@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.Dependencies;
 using System.Web.Http.Filters;
 
 namespace SessionModuleClient
@@ -30,10 +36,64 @@ namespace SessionModuleClient
              * If user session cannot be retrived, then the context principal
              * should be an empty ClaimsPrincipal (unauthenticated).
              */
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            HttpRequestMessage request = context.Request;
+            string token = GetSessionToken(request);
 
-            throw new NotImplementedException();
+            if (token == null)
+            {
+                context.Principal = new ClaimsPrincipal();
+                return;
+            }
+            UserSessionDto session = await GetSession(context, cancellationToken, token);
+            if (session == null)
+            {
+                context.Principal = new ClaimsPrincipal();
+                return;
+            }
+            context.Principal = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new[]
+                    {
+                        new Claim("token", token),
+                        new Claim("userFullName", session.UserFullname),
+                    },
+                    "authenticateType"));
 
             #endregion
+        }
+
+        static async Task<UserSessionDto> GetSession(HttpAuthenticationContext context, CancellationToken cancellationToken, string token)
+        {
+            IDependencyScope scope = context.Request.GetDependencyScope();
+            if(scope == null) throw new InvalidOperationException();
+            var client = (HttpClient)scope.GetService(typeof(HttpClient));
+            if(client == null) throw new InvalidOperationException();
+            Uri requestUri = context.Request.RequestUri;
+            HttpResponseMessage response = await
+                client.GetAsync(
+                    $"{requestUri.Scheme}://{requestUri.UserInfo}{requestUri.Authority}/session/{token}",
+                    cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+            return await
+                response.Content.ReadAsAsync<UserSessionDto>(
+                    context.ActionContext.ControllerContext.Configuration.Formatters,
+                    cancellationToken);
+        }
+
+        string GetSessionToken(HttpRequestMessage request)
+        {
+            const string sessionTokenkey = "X-Session-Token";
+            Collection<CookieHeaderValue> cookieHeaderValues = request.Headers.GetCookies(sessionTokenkey);
+            CookieState sessionCookie = cookieHeaderValues
+                .Where(chv => chv.Expires == null || chv.Expires > DateTimeOffset.Now)
+                .SelectMany(chv => chv.Cookies)
+                .FirstOrDefault(c => c.Name == sessionTokenkey);
+            string token = sessionCookie?.Value;
+            return string.IsNullOrEmpty(token) ? null : token;
         }
 
         public Task ChallengeAsync(
@@ -49,9 +109,11 @@ namespace SessionModuleClient
              * And if the value is false, then simply keeps the original
              * response.
              */
-
-            throw new NotImplementedException();
-
+            if (RedirectToLoginOnChallenge)
+            {
+                context.Result = new RedirectToLoginPageIfUnauthorizedResult(context.Request, context.Result);
+            }
+            return Task.CompletedTask;
             #endregion
         }
     }
