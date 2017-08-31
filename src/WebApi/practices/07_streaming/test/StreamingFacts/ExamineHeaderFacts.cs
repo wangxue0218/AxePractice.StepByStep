@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
@@ -31,6 +32,9 @@ namespace StreamingFacts
              * NOTE: you may have to start the WebApp application on port 49724
              * before executing the unit test.
              */
+            var response = await Client.GetAsync("stream/slow", HttpCompletionOption.ResponseHeadersRead);
+
+            filename = response.Content.Headers.ContentDisposition.FileName;
 
             #endregion
 
