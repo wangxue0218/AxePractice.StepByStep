@@ -29,7 +29,6 @@ namespace WebApp
 
             return !string.IsNullOrEmpty(requestContentType) &&
                    !string.Equals(requestContentType, "application/octet-stream", StringComparison.OrdinalIgnoreCase);
-
             #endregion
         }
     }
