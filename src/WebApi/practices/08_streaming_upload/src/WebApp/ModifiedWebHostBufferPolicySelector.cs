@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web;
 using System.Web.Http.WebHost;
 
 namespace WebApp
@@ -20,8 +21,14 @@ namespace WebApp
              * We are handling large file upload so we should not use streaming if 
              * the content is something that we do not know (octet-stream).
              */
+            if(hostContext == null) throw new ArgumentNullException(nameof(hostContext));
+            var context = hostContext as HttpContextBase;
+            if(context == null) return true;
+            HttpRequestBase request = context.Request;
+            string requestContentType = request.ContentType;
 
-            throw new NotImplementedException();
+            return !string.IsNullOrEmpty(requestContentType) &&
+                   !string.Equals(requestContentType, "application/octet-stream", StringComparison.OrdinalIgnoreCase);
 
             #endregion
         }

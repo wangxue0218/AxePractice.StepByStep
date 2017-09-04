@@ -9,9 +9,8 @@ namespace StreamingFacts
 
         public FixedLengthStream(long length)
         {
-            Length = length <= 0
-                ? throw new ArgumentOutOfRangeException(nameof(length))
-                : length;
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
         }
 
         public override void Flush()
@@ -65,8 +64,8 @@ namespace StreamingFacts
 
         public override long Position
         {
-            get => position;
-            set => throw new NotSupportedException();
+            get { return position;}
+            set { throw new NotSupportedException(); }
         }
     }
 }
