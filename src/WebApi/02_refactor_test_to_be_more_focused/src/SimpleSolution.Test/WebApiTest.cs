@@ -1,28 +1,33 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Newtonsoft.Json;
+using SimpleSolution.WebApp;
 using Xunit;
 
 namespace SimpleSolution.Test
 {
-    public class WebApiTest : ResourceTestBase
+    public class WebApiTest
     {
         [Fact]
-        public async Task should_get_ok_when_getting_message()
+        public async Task should_get_hello()
         {
-            HttpResponseMessage resp = await Client.GetAsync("http://www.baidu.com/message");
+            var config = new HttpConfiguration();
+            Bootstrapper.Init(config);
+            var httpServer = new HttpServer(config);
+
+            var client = new HttpClient(httpServer)
+            {
+                BaseAddress = new Uri("http://www.baidu.com")
+            };
+
+            HttpResponseMessage resp = await client.GetAsync("http://www.baidu.com/message");
 
             Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-        }
-
-        [Fact]
-        public async Task should_get_hello_when_getting_message()
-        {
-            HttpResponseMessage resp = await Client.GetAsync("http://www.baidu.com/message");
-
             string content = await resp.Content.ReadAsStringAsync();
-            var payload = JsonConvert.DeserializeAnonymousType(content, new { message = default(string) });
+            var payload = JsonConvert.DeserializeAnonymousType(content, new {message = default(string)});
             Assert.Equal("Hello", payload.message);
         }
     }
