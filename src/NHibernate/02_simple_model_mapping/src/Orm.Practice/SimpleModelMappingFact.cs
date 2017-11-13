@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Reflection;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
 using NHibernate;
 using Xunit;
 
@@ -18,17 +21,18 @@ namespace Orm.Practice
         #region please provide a valid sql server connection string
 
         /*
-         * A connection string is needed when connecting to SQL Server instance. 
+         * A connection string is needed when connecting to SQL Server instance.
          * Our connection string contains the following parts.
-         * 
+         *
          * - Data Source: The data source name or location
          * - Initial Catalog: The default database that the connection will work with
-         * - Integrated Security: whether User ID and Password are specified in the 
+         * - Integrated Security: whether User ID and Password are specified in the
          *   connection. For example, if you use Windows Authentication to access SQL
          *   Server instance, this value should set as `true`.
          */
 
-        protected string ConnectionString { get; } = string.Empty;
+        protected string ConnectionString { get; }
+            = "Data Source=(local);Initial Catalog=AdventureWorks2014;Integrated Security=True;";
 
         #endregion
 
@@ -38,7 +42,7 @@ namespace Orm.Practice
 
             #region Please initialize the session object
 
-            throw new NotImplementedException();
+            session = sessionFactory.OpenSession();
 
             #endregion
         }
@@ -49,12 +53,15 @@ namespace Orm.Practice
 
             /*
              * We use *FluentNHiberate* package to configure NHibernate. In order
-             * to do query, we should get a `ISession` object, which holds the 
-             * connection to database. The `ISession` object is created by a 
+             * to do query, we should get a `ISession` object, which holds the
+             * connection to database. The `ISession` object is created by a
              * `ISessionFactory` so `ISessionFactory` should be created first.
              */
-
-            throw new NotImplementedException();
+            return Fluently
+                .Configure()
+                .Database(config:MsSqlConfiguration.MsSql2012.ConnectionString(connectionString))
+                .Mappings(m => m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly()))
+                .BuildSessionFactory();
 
             #endregion
         }
