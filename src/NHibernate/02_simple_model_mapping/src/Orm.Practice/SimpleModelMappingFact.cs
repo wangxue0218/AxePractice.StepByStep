@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using FluentNHibernate.Automapping;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
@@ -57,10 +58,19 @@ namespace Orm.Practice
              * connection to database. The `ISession` object is created by a
              * `ISessionFactory` so `ISessionFactory` should be created first.
              */
+            var autoMappingConfig = new TypeSpecificAutomappingConfigration();
+            var currentAssembly = Assembly.GetExecutingAssembly();
+
             return Fluently
                 .Configure()
                 .Database(config:MsSqlConfiguration.MsSql2012.ConnectionString(connectionString))
-                .Mappings(m => m.FluentMappings.AddFromAssembly(Assembly.GetExecutingAssembly()))
+                .Mappings(m =>
+                {
+                    m.AutoMappings.Add(
+                        AutoMap
+                        .Assembly(currentAssembly, autoMappingConfig)
+                        .UseOverridesFromAssembly(currentAssembly));
+                })
                 .BuildSessionFactory();
 
             #endregion
