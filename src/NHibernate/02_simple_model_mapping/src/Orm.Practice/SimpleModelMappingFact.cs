@@ -32,8 +32,8 @@ namespace Orm.Practice
          *   Server instance, this value should set as `true`.
          */
 
-        protected string ConnectionString { get; }
-            = "Data Source=(local);Initial Catalog=AdventureWorks2014;Integrated Security=True;";
+        protected static string ConnectionString { get; } =
+            @"Data Source=.\SQLExpress; Initial Catalog=AdventureWorks2014; Integrated Security=true;";
 
         #endregion
 
@@ -63,13 +63,13 @@ namespace Orm.Practice
 
             return Fluently
                 .Configure()
-                .Database(config:MsSqlConfiguration.MsSql2012.ConnectionString(connectionString))
+                .Database(config: MsSqlConfiguration.MsSql2012.ConnectionString(connectionString))
                 .Mappings(m =>
                 {
                     m.AutoMappings.Add(
                         AutoMap
-                        .Assembly(currentAssembly, autoMappingConfig)
-                        .UseOverridesFromAssembly(currentAssembly));
+                            .Assembly(currentAssembly, autoMappingConfig)
+                            .UseOverridesFromAssembly(currentAssembly));
                 })
                 .BuildSessionFactory();
 
