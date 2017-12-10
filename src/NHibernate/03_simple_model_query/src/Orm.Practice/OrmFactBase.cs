@@ -18,7 +18,7 @@ namespace Orm.Practice
         readonly StringWriter outputCache = new StringWriter();
 
         protected string ConnectionString { get; }
-            = "Data Source=(local);Initial Catalog=AdventureWorks2014;Integrated Security=True;";
+            = @"Data Source=.\SQLExpress; Initial Catalog=AdventureWorks2014;Integrated Security=True;";
 
         protected OrmFactBase(ITestOutputHelper output)
         {

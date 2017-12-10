@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NHibernate;
+using NHibernate.Criterion;
+using NHibernate.Util;
 
 namespace Orm.Practice
 {
@@ -16,7 +20,7 @@ namespace Orm.Practice
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return Session.QueryOver<Address>().Where(a => a.Id == id).SingleOrDefault();
 
             #endregion
         }
@@ -25,7 +29,11 @@ namespace Orm.Practice
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return Session.QueryOver<Address>()
+                .WhereRestrictionOn(e => e.Id)
+                .IsIn(ids.ToList())
+                .OrderBy(e => e.Id).Asc
+                .List();
 
             #endregion
         }
@@ -34,7 +42,10 @@ namespace Orm.Practice
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return Session.QueryOver<Address>()
+                .Where(a => a.City == city)
+                .OrderBy(a => a.Id).Asc
+                .List();
 
             #endregion
         }
@@ -43,16 +54,19 @@ namespace Orm.Practice
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return GetByCityAsync(city, CancellationToken.None);
 
             #endregion
         }
 
-        public Task<IList<Address>> GetByCityAsync(string city, CancellationToken cancellationToken)
+        public async Task<IList<Address>> GetByCityAsync(string city, CancellationToken cancellationToken)
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return await Session.QueryOver<Address>()
+                .Where(a => a.City == city)
+                .OrderBy(a => a.Id).Asc
+                .ListAsync(cancellationToken);
 
             #endregion
         }
@@ -61,7 +75,12 @@ namespace Orm.Practice
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return Session.QueryOver<Address>()
+                .Where(a => a.City == city)
+                .List<Address>()
+                .Select(a => new KeyValuePair<int, string>(a.Id, a.AddressLine1))
+                .OrderBy(a => a.Key)
+                .ToList();
 
             #endregion
         }
@@ -70,7 +89,10 @@ namespace Orm.Practice
         {
             #region Please implement the method
 
-            throw new NotImplementedException();
+            return Session.QueryOver<Address>()
+                .Where(a => a.City == city)
+                .Select(Projections.Distinct(Projections.Property<Address>(e => e.PostalCode)))
+                .List<String>();
 
             #endregion
         }
