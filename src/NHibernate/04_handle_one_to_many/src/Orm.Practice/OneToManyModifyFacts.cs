@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using NHibernate;
 using NHibernate.Linq;
@@ -62,6 +61,15 @@ namespace Orm.Practice
             Session.Save(child);
             Session.Flush();
 
+            // insertedParent.Children.Add(new Child
+            // {
+            //     IsForQuery = false,
+            //     Name = "nq-child-1-parent-1",
+            //     Parent = insertedParent
+            // });
+            // Session.Update(insertedParent);
+            // Session.Flush();
+
             #endregion
 
             Session.Clear();
@@ -112,13 +120,10 @@ namespace Orm.Practice
             var parent = new Parent
             {
                 IsForQuery = false,
-                Name = parentName,
-                Children = new List<Child>()
+                Name = parentName
             };
 
-            var childrens = childrenNames.Select(c => new Child {IsForQuery = false, Name = c, Parent = parent}).ToList();
-
-            parent.Children = childrens;
+            parent.Children = childrenNames.Select(c => new Child {IsForQuery = false, Name = c, Parent = parent}).ToList();
 
             Session.Save(parent);
 
