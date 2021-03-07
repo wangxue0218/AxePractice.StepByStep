@@ -13,6 +13,7 @@ namespace Orm.Practice.Entities
 
         // It is totally okay if you do not want to do anything here.
         public virtual Parent Parent { get; set; }
+        // public virtual Guid ParentId { get; set; }
         #endregion
     }
 
@@ -26,6 +27,7 @@ namespace Orm.Practice.Entities
             Map(c => c.Name);
             Map(c => c.IsForQuery);
             References(c => c.Parent).Column("ParentID");
+            // Map(c => c.ParentId).Column("ParentID");
 
             #endregion
         }

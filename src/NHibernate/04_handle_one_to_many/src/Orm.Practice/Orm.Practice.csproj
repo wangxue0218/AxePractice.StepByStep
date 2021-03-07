@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Entities\Child.cs" />
     <Compile Include="Entities\Parent.cs" />
+    <Compile Include="OneToManyCascadeFacts.cs" />
     <Compile Include="OneToManyModifyFacts.cs" />
     <Compile Include="OneToManyModifyInverseTrueFacts.cs" />
     <Compile Include="OneToManyModifyInverseFalseFacts.cs" />
